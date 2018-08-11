@@ -12,10 +12,11 @@ RUN apk update \
   && apk add libffi-dev py-cffi
 
 RUN addgroup -S django \
-    && adduser -S -G django django
+    && adduser -S -G django django \
 
 # installs git into the Docker image, as required by tox
-RUN apt-get update && apt-get install git -y
+# RUN apt-get update && apt-get install git -y
+RUN apk add apk add git \
 
 # Requirements are installed here to ensure they will be cached.
 COPY ./requirements /requirements
