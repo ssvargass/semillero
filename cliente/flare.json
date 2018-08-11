@@ -1,0 +1,25 @@
+{
+  "name": "facultades",
+  "children": [
+    {
+      "name": "Ciencias Basicas",
+      "id": 1,
+      "size": 5
+    },
+    {
+      "name": "Ciencias de la Comunicación y Humanidades",
+      "id": 2,
+      "size": 2
+    },
+    {
+      "name": "Ciencias Humanas y Sociales",
+      "id": 3,
+      "size": 7
+    },
+    {
+      "name": "Derecho Ciencias Políticas y Relaciones Internacionales",
+      "id": 4,
+      "size": 4
+    }
+  ]
+}
