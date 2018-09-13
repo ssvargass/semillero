@@ -1,47 +1,22 @@
 version: '2'
 
 volumes:
-  postgres_data_local: {}
-  postgres_backup_local: {}
-  esdata1:
-    driver: local
+  postgres_data: {}
+  postgres_backup: {}
+  caddy: {}
 
 services:
-
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch-platinum:6.2.4
-    container_name: elasticsearch
-    environment: ['http.host=0.0.0.0', 'transport.host=127.0.0.1', 'ELASTIC_PASSWORD=elastic']
-    ports: ['127.0.0.1:9200:9200']
-    networks: ['stack']
-
-  kibana:
-    image: docker.elastic.co/kibana/kibana:6.2.4
-    container_name: kibana
-    environment:
-      - ELASTICSEARCH_USERNAME=elastic
-      - ELASTICSEARCH_PASSWORD=elastic
-    ports: ['127.0.0.1:5601:5601']
-    networks: ['stack']
-    depends_on: ['elasticsearch']
-
-
   django: &django
     build:
       context: .
-      dockerfile: ./compose/local/django/Dockerfile
-    image: semillero_local_django
+      dockerfile: ./compose/production/django/Dockerfile
+    image: semillero_production_django
     depends_on:
       - postgres
-      - elasticsearch
-    volumes:
-      - .:/app
+      - redis
     env_file:
-      - ./.envs/.local/.django
-      - ./.envs/.local/.postgres
-    ports:
-      - "80:80"
-    networks: ['stack']
+      - ./.envs/.production/.django
+      - ./.envs/.production/.postgres
     command: /start
 
   postgres:
@@ -50,42 +25,47 @@ services:
       dockerfile: ./compose/production/postgres/Dockerfile
     image: semillero_production_postgres
     volumes:
-      - postgres_data_local:/var/lib/postgresql/data
-      - postgres_backup_local:/backups
+      - postgres_data:/var/lib/postgresql/data
+      - postgres_backup:/backups
     env_file:
-      - ./.envs/.local/.postgres
-    networks: ['stack']
+      - ./.envs/.production/.postgres
+
+  caddy:
+    build:
+      context: .
+      dockerfile: ./compose/production/caddy/Dockerfile
+    image: semillero_production_caddy
+    depends_on:
+      - django
+    volumes:
+      - caddy:/root/.caddy
+    env_file:
+      - ./.envs/.production/.caddy
+    ports:
+      - "0.0.0.0:80:80"
+      - "0.0.0.0:443:443"
 
   redis:
     image: redis:3.2
-    networks: ['stack']
 
   celeryworker:
     <<: *django
-    image: semillero_local_celeryworker
+    image: semillero_production_celeryworker
     depends_on:
-      - redis
-      - postgres
-
+     - postgres
+     - redis
     env_file:
-      - ./.envs/.local/.django
-      - ./.envs/.local/.postgres
-    ports: []
+      - ./.envs/.production/.django
+      - ./.envs/.production/.postgres
     command: /start-celeryworker
-    networks: ['stack']
 
   celerybeat:
     <<: *django
-    image: semillero_local_celerybeat
+    image: semillero_production_celerybeat
     depends_on:
-      - redis
       - postgres
-
+      - redis
     env_file:
-      - ./.envs/.local/.django
-      - ./.envs/.local/.postgres
-    ports: []
+      - ./.envs/.production/.django
+      - ./.envs/.production/.postgres
     command: /start-celerybeat
-    networks: ['stack']
-
-networks: {stack: {}}
