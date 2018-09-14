@@ -58,8 +58,8 @@ The `Docker compose documentation`_ explains in detail what you can accomplish i
         build: database
     webapp:
         build: webapp:
-        command: /usr/bin/python3.6 manage.py runserver 0.0.0.0:8000 # dev setting
-        # command: gunicorn -b 0.0.0.0:8000 wsgi:application # production setting
+        command: /usr/bin/python3.6 manage.py runserver 0.0.0.0:80 # dev setting
+        # command: gunicorn -b 0.0.0.0:80 wsgi:application # production setting
         volumes:
             - webapp/your_project_name:/path/to/container/workdir/
         links:
@@ -109,7 +109,7 @@ We'll ignore the webserver for now (you'll want to comment that part out while w
 
 Running `sudo docker-compose -f production.yml build` will follow the instructions in your `production.yml` file and build the database container, then your webapp, before mounting your cookiecutter project files as a volume in the webapp container and linking to the database. Our example yaml file runs in development mode but changing it to production mode is as simple as commenting out the line using `runserver` and uncommenting the line using `gunicorn`.
 
-Both are set to run on port `0.0.0.0:8000`, which is where the Docker daemon will discover it. You can now run `sudo docker-compose -f production.yml up` and browse to `localhost:8000` to see your application running.
+Both are set to run on port `0.0.0.0:80`, which is where the Docker daemon will discover it. You can now run `sudo docker-compose -f production.yml up` and browse to `localhost:80` to see your application running.
 
 Deployment
 ^^^^^^^^^^
@@ -147,7 +147,7 @@ That Dockerfile assumes you have an Nginx conf file named `site.conf` in the sam
 
     # see http://serverfault.com/questions/577370/how-can-i-use-environment-variables-in-nginx-conf#comment730384_577370
     upstream localhost {
-        server webapp_1:8000;
+        server webapp_1:80;
     }
     server {
         location / {

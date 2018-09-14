@@ -3,8 +3,8 @@ version: '2'
 volumes:
   postgres_data_local: {}
   postgres_backup_local: {}
-  esdata1:
-    driver: local
+#  esdata1:
+#    driver: local
 
 services:
 
@@ -40,7 +40,7 @@ services:
       - ./.envs/.local/.django
       - ./.envs/.local/.postgres
     ports:
-      - "8000:8000"
+      - "80:80"
 #    networks: ['stack']
     command: /start
 
